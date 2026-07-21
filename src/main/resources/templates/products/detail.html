@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -19,14 +20,60 @@
 
 <nav class="navbar navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" th:href="@{/}">
+
+        <a class="navbar-brand"
+           th:href="@{/}">
             RateMyProtein
         </a>
 
-        <a class="btn btn-outline-light"
-           th:href="@{/products}">
-            Back to Products
-        </a>
+        <div class="d-flex align-items-center gap-2">
+
+            <a class="nav-link text-white"
+               th:href="@{/products}">
+                Products
+            </a>
+
+            <!-- Visible only when the user is logged out -->
+            <div sec:authorize="isAnonymous()"
+                 class="d-flex gap-2">
+
+                <a class="btn btn-outline-light"
+                   th:href="@{/login}">
+                    Log In
+                </a>
+
+                <a class="btn btn-warning"
+                   th:href="@{/register}">
+                    Create Account
+                </a>
+
+            </div>
+
+            <!-- Visible only when the user is logged in -->
+            <div sec:authorize="isAuthenticated()"
+                 class="d-flex align-items-center gap-3">
+
+                <span class="text-white">
+                    <strong sec:authentication="name">
+                        user@example.com
+                    </strong>
+                </span>
+
+                <form th:action="@{/logout}"
+                      method="post"
+                      class="m-0">
+
+                    <button type="submit"
+                            class="btn btn-outline-light">
+                        Log Out
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
     </div>
 </nav>
 

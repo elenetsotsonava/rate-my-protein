@@ -10,34 +10,79 @@
 
     <title>Create Account | RateMyProtein</title>
 
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Exo+2:wght@600;700;800&display=swap"
+          rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
 
     <style>
-        body {
-            background: #f5f8fc;
-            color: #0d1b2e;
+        :root {
+            --page-background: #f5f8fc;
+            --navy: #0d1b2e;
+            --orange: #f97316;
+            --orange-dark: #dc5f0b;
+            --muted-text: #5e6e85;
         }
 
-        .registration-card {
-            border: 0;
-            border-radius: 16px;
+        body {
+            min-height: 100vh;
+            background: var(--page-background);
+            color: var(--navy);
+            font-family: "DM Sans", sans-serif;
+        }
+
+        h1,
+        .navbar-brand {
+            font-family: "Exo 2", sans-serif;
         }
 
         .brand-accent {
-            color: #f97316;
+            color: var(--orange);
         }
 
-        .btn-register {
-            background: #f97316;
-            border-color: #f97316;
+        .auth-card {
+            border: 0;
+            border-radius: 18px;
+            box-shadow: 0 16px 45px rgba(13, 27, 46, 0.09);
+        }
+
+        .form-control {
+            min-height: 48px;
+            border-radius: 10px;
+        }
+
+        .form-control:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.15);
+        }
+
+        .btn-orange {
+            min-height: 48px;
+            background: var(--orange);
+            border-color: var(--orange);
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-orange:hover,
+        .btn-orange:focus {
+            background: var(--orange-dark);
+            border-color: var(--orange-dark);
             color: white;
         }
 
-        .btn-register:hover {
-            background: #dc5f0b;
-            border-color: #dc5f0b;
-            color: white;
+        .auth-link {
+            color: var(--orange-dark);
+            font-weight: 600;
         }
     </style>
 </head>
@@ -45,7 +90,7 @@
 <body>
 
 <nav class="navbar bg-white border-bottom">
-    <div class="container">
+    <div class="container py-2">
 
         <a class="navbar-brand fw-bold"
            th:href="@{/}">
@@ -64,19 +109,19 @@
 
     <div class="row justify-content-center">
 
-        <div class="col-md-8 col-lg-6">
+        <div class="col-md-9 col-lg-7 col-xl-6">
 
-            <div class="card registration-card shadow-sm">
+            <div class="card auth-card">
 
                 <div class="card-body p-4 p-md-5">
 
-                    <h1 class="h2 fw-bold mb-2">
+                    <h1 class="fw-bold mb-2">
                         Create your account
                     </h1>
 
                     <p class="text-secondary mb-4">
-                        Join RateMyProtein and share your protein
-                        flavor experience.
+                        Join RateMyProtein and share your experience
+                        with protein products and flavors.
                     </p>
 
                     <form th:action="@{/register}"
@@ -84,12 +129,23 @@
                           method="post"
                           novalidate>
 
+                        <div th:if="${#fields.hasGlobalErrors()}"
+                             class="alert alert-danger">
+
+                            <p th:each="error : ${#fields.globalErrors()}"
+                               th:text="${error}"
+                               class="mb-0">
+                                Registration error
+                            </p>
+
+                        </div>
+
                         <div class="row">
 
                             <div class="col-md-6 mb-3">
 
                                 <label for="firstName"
-                                       class="form-label">
+                                       class="form-label fw-semibold">
                                     First name
                                 </label>
 
@@ -111,7 +167,7 @@
                             <div class="col-md-6 mb-3">
 
                                 <label for="lastName"
-                                       class="form-label">
+                                       class="form-label fw-semibold">
                                     Last name
                                 </label>
 
@@ -135,8 +191,8 @@
                         <div class="mb-3">
 
                             <label for="email"
-                                   class="form-label">
-                                Email
+                                   class="form-label fw-semibold">
+                                Email address
                             </label>
 
                             <input id="email"
@@ -157,7 +213,7 @@
                         <div class="mb-3">
 
                             <label for="password"
-                                   class="form-label">
+                                   class="form-label fw-semibold">
                                 Password
                             </label>
 
@@ -169,6 +225,10 @@
                                    th:field="*{password}"
                                    autocomplete="new-password">
 
+                            <div class="form-text">
+                                Use at least eight characters.
+                            </div>
+
                             <div class="invalid-feedback"
                                  th:errors="*{password}">
                                 Password error
@@ -179,7 +239,7 @@
                         <div class="mb-4">
 
                             <label for="confirmPassword"
-                                   class="form-label">
+                                   class="form-label fw-semibold">
                                 Confirm password
                             </label>
 
@@ -193,29 +253,29 @@
 
                             <div class="invalid-feedback"
                                  th:errors="*{confirmPassword}">
-                                Confirmation error
+                                Password-confirmation error
                             </div>
 
                         </div>
 
                         <button type="submit"
-                                class="btn btn-register w-100 py-2">
+                                class="btn btn-orange w-100">
                             Create Account
                         </button>
 
                     </form>
 
-                    <p class="text-center mt-4 mb-0">
+                    <p class="text-center text-secondary mt-4 mb-0">
                         Already have an account?
 
-                        <a th:href="@{/login}">
+                        <a class="auth-link"
+                           th:href="@{/login}">
                             Log in
                         </a>
                     </p>
 
                 </div>
             </div>
-
         </div>
     </div>
 

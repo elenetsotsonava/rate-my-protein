@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.Objects;
+
 @Controller
 public class AuthController {
 
@@ -38,7 +40,8 @@ public class AuthController {
             BindingResult bindingResult
     ) {
 
-        if (!request.getPassword().equals(
+        if (!Objects.equals(
+                request.getPassword(),
                 request.getConfirmPassword()
         )) {
             bindingResult.rejectValue(
@@ -63,9 +66,9 @@ public class AuthController {
         try {
             userService.registerUser(request);
         } catch (IllegalArgumentException exception) {
-            bindingResult.rejectValue(
-                    "email",
-                    "email.exists",
+
+            bindingResult.reject(
+                    "registration.failed",
                     exception.getMessage()
             );
 
