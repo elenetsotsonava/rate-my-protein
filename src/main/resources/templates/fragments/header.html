@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+
+<header th:fragment="header">
+    <nav class="navbar navbar-expand-lg navbar-dark site-header">
+        <div class="container py-2">
+
+            <a class="navbar-brand"
+               th:href="@{/}">
+                RateMy<span class="brand-accent">Protein</span>
+            </a>
+
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#mainNavigation"
+                    aria-controls="mainNavigation"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse"
+                 id="mainNavigation">
+
+                <ul class="navbar-nav me-auto ms-lg-4">
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:href="@{/}">
+                            Home
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:href="@{/products}">
+                            Products
+                        </a>
+                    </li>
+
+                </ul>
+
+                <div sec:authorize="isAnonymous()"
+                     class="d-flex gap-2 mt-3 mt-lg-0">
+
+                    <a class="btn btn-outline-light"
+                       th:href="@{/login}">
+                        Log In
+                    </a>
+
+                    <a class="btn btn-orange"
+                       th:href="@{/register}">
+                        Create Account
+                    </a>
+
+                </div>
+
+                <div sec:authorize="isAuthenticated()"
+                     class="d-flex flex-column flex-lg-row
+                            align-items-lg-center gap-3 mt-3 mt-lg-0">
+
+                    <span class="text-white">
+                        <strong sec:authentication="name">
+                            user@example.com
+                        </strong>
+                    </span>
+
+                    <form th:action="@{/logout}"
+                          method="post"
+                          class="m-0">
+
+                        <button type="submit"
+                                class="btn btn-outline-light">
+                            Log Out
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </nav>
+</header>
+
+</body>
+</html>
