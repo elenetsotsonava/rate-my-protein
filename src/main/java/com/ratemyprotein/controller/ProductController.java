@@ -1,5 +1,7 @@
 package com.ratemyprotein.controller;
 
+import com.ratemyprotein.entity.ProteinType;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.ratemyprotein.entity.Product;
 import com.ratemyprotein.entity.Review;
 import com.ratemyprotein.service.ProductService;
@@ -26,11 +28,64 @@ public class ProductController {
     }
 
     @GetMapping("/products")
-    public String showProducts(Model model) {
+    public String showProducts(
+            @RequestParam(required = false)
+            String search,
 
+            @RequestParam(required = false)
+            Long brandId,
+
+            @RequestParam(required = false)
+            Long flavorId,
+
+            @RequestParam(required = false)
+            ProteinType proteinType,
+
+            Model model
+    ) {
         model.addAttribute(
                 "products",
-                productService.getActiveProducts()
+                productService.searchProducts(
+                        search,
+                        brandId,
+                        flavorId,
+                        proteinType
+                )
+        );
+
+        model.addAttribute(
+                "brands",
+                productService.getAllBrands()
+        );
+
+        model.addAttribute(
+                "flavors",
+                productService.getAllFlavors()
+        );
+
+        model.addAttribute(
+                "proteinTypes",
+                ProteinType.values()
+        );
+
+        model.addAttribute(
+                "search",
+                search == null ? "" : search
+        );
+
+        model.addAttribute(
+                "selectedBrandId",
+                brandId
+        );
+
+        model.addAttribute(
+                "selectedFlavorId",
+                flavorId
+        );
+
+        model.addAttribute(
+                "selectedProteinType",
+                proteinType
         );
 
         return "products/list";
