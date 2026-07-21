@@ -1,11 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>RateMyProtein</title>
 </head>
 <body>
-    <h1>RateMyProtein</h1>
-    <p>Protein supplement flavor profiling and review platform.</p>
+
+<h1>RateMyProtein</h1>
+
+<p>
+    Protein supplement flavor profiling and review platform.
+</p>
+
+<a th:href="@{/products}">
+    Explore Products
+</a>
+
 </body>
 </html>
