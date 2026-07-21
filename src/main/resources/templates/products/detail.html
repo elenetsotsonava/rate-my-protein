@@ -82,7 +82,15 @@
          class="alert alert-success">
         Your review was submitted successfully.
     </div>
+    <div th:if="${param.reviewUpdated}"
+         class="alert alert-success">
+        Your review was updated successfully.
+    </div>
 
+    <div th:if="${param.reviewDeleted}"
+         class="alert alert-success">
+        Your review was deleted successfully.
+    </div>
     <div th:if="${param.alreadyReviewed}"
          class="alert alert-warning">
         You have already reviewed this product.
@@ -415,6 +423,31 @@
                             5
                         </span>
                     </span>
+
+                    </div>
+                    <div sec:authorize="isAuthenticated()"
+                         th:if="${#strings.equalsIgnoreCase(
+        #authentication.name,
+        review.user.email
+    )}"
+                         class="d-flex gap-2 mt-3">
+
+                        <a class="btn btn-sm btn-outline-primary"
+                           th:href="@{/reviews/{id}/edit(id=${review.id})}">
+                            Edit
+                        </a>
+
+                        <form th:action="@{/reviews/{id}/delete(id=${review.id})}"
+                              method="post"
+                              class="m-0"
+                              onsubmit="return confirm('Delete this review?');">
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </button>
+
+                        </form>
 
                     </div>
 

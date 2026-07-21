@@ -1,5 +1,6 @@
 package com.ratemyprotein.controller;
 
+import com.ratemyprotein.entity.Review;
 import com.ratemyprotein.dto.ReviewRequest;
 import com.ratemyprotein.entity.Product;
 import com.ratemyprotein.service.ProductService;
@@ -51,8 +52,110 @@ public class ReviewController {
                 "reviewRequest",
                 new ReviewRequest()
         );
+        model.addAttribute("editMode", false);
 
         return "reviews/form";
+    }
+
+    @GetMapping("/reviews/{reviewId}/edit")
+    public String showEditForm(
+            @PathVariable Long reviewId,
+            Principal principal,
+            Model model
+    ) {
+        try {
+            Review review = reviewService.getOwnedReview(
+                    reviewId,
+                    principal.getName()
+            );
+
+            model.addAttribute(
+                    "product",
+                    productService.getProductById(
+                            review.getProduct().getId()
+                    )
+            );
+
+            model.addAttribute(
+                    "reviewRequest",
+                    reviewService.createRequestFromReview(
+                            reviewId,
+                            principal.getName()
+                    )
+            );
+
+            model.addAttribute("reviewId", reviewId);
+            model.addAttribute("editMode", true);
+
+            return "reviews/form";
+
+        } catch (SecurityException exception) {
+            return "redirect:/products?forbidden";
+        }
+    }
+
+    @PostMapping("/reviews/{reviewId}/edit")
+    public String updateReview(
+            @PathVariable Long reviewId,
+            @Valid
+            @ModelAttribute("reviewRequest")
+            ReviewRequest reviewRequest,
+            BindingResult bindingResult,
+            Principal principal,
+            Model model
+    ) {
+        Review review;
+
+        try {
+            review = reviewService.getOwnedReview(
+                    reviewId,
+                    principal.getName()
+            );
+        } catch (SecurityException exception) {
+            return "redirect:/products?forbidden";
+        }
+
+        Product product = productService.getProductById(
+                review.getProduct().getId()
+        );
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("product", product);
+            model.addAttribute("reviewId", reviewId);
+            model.addAttribute("editMode", true);
+
+            return "reviews/form";
+        }
+
+        reviewService.updateReview(
+                reviewId,
+                principal.getName(),
+                reviewRequest
+        );
+
+        return "redirect:/products/"
+                + product.getId()
+                + "?reviewUpdated";
+    }
+
+    @PostMapping("/reviews/{reviewId}/delete")
+    public String deleteReview(
+            @PathVariable Long reviewId,
+            Principal principal
+    ) {
+        try {
+            Long productId = reviewService.deleteReview(
+                    reviewId,
+                    principal.getName()
+            );
+
+            return "redirect:/products/"
+                    + productId
+                    + "?reviewDeleted";
+
+        } catch (SecurityException exception) {
+            return "redirect:/products?forbidden";
+        }
     }
 
     @PostMapping("/reviews/products/{productId}")

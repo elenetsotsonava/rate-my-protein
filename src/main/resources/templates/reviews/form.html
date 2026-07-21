@@ -69,7 +69,10 @@
 
                 <div class="card-body p-4 p-md-5">
 
-                    <h1 class="h2 fw-bold">
+                    <h1 class="h2 fw-bold"
+                        th:text="${editMode}
+            ? 'Edit Your Review'
+            : 'Write a Review'">
                         Write a Review
                     </h1>
 
@@ -91,7 +94,9 @@
                         </span>
                     </p>
 
-                    <form th:action="@{/reviews/products/{id}(id=${product.id})}"
+                    <form th:action="${editMode
+        ? '/reviews/' + reviewId + '/edit'
+        : '/reviews/products/' + product.id}"
                           th:object="${reviewRequest}"
                           method="post"
                           novalidate>
@@ -288,7 +293,10 @@
                         </div>
 
                         <button class="btn btn-orange"
-                                type="submit">
+                                type="submit"
+                                th:text="${editMode}
+                ? 'Save Changes'
+                : 'Submit Review'">
                             Submit Review
                         </button>
 

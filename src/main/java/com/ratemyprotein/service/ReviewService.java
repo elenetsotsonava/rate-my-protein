@@ -28,7 +28,61 @@ public class ReviewService {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
     }
+    @Transactional(readOnly = true)
+    public Review getOwnedReview(
+            Long reviewId,
+            String email
+    ) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Review not found"
+                        )
+                );
 
+        if (!review.getUser().getEmail()
+                .equalsIgnoreCase(email)) {
+            throw new SecurityException(
+                    "You cannot modify this review"
+            );
+        }
+
+        return review;
+    }
+
+    @Transactional
+    public Review updateReview(
+            Long reviewId,
+            String email,
+            ReviewRequest request
+    ) {
+        Review review = getOwnedReview(reviewId, email);
+
+        review.setOverallRating(request.getOverallRating());
+        review.setTasteRating(request.getTasteRating());
+        review.setTextureRating(request.getTextureRating());
+        review.setMixabilityRating(request.getMixabilityRating());
+        review.setSweetnessRating(request.getSweetnessRating());
+        review.setAftertasteRating(request.getAftertasteRating());
+        review.setReviewText(request.getReviewText().trim());
+        review.setWouldBuyAgain(request.isWouldBuyAgain());
+
+        return reviewRepository.save(review);
+    }
+
+    @Transactional
+    public Long deleteReview(
+            Long reviewId,
+            String email
+    ) {
+        Review review = getOwnedReview(reviewId, email);
+
+        Long productId = review.getProduct().getId();
+
+        reviewRepository.delete(review);
+
+        return productId;
+    }
     @Transactional(readOnly = true)
     public boolean hasUserReviewedProduct(
             String email,
@@ -41,7 +95,26 @@ public class ReviewService {
                 productId
         );
     }
+    @Transactional(readOnly = true)
+    public ReviewRequest createRequestFromReview(
+            Long reviewId,
+            String email
+    ) {
+        Review review = getOwnedReview(reviewId, email);
 
+        ReviewRequest request = new ReviewRequest();
+
+        request.setOverallRating(review.getOverallRating());
+        request.setTasteRating(review.getTasteRating());
+        request.setTextureRating(review.getTextureRating());
+        request.setMixabilityRating(review.getMixabilityRating());
+        request.setSweetnessRating(review.getSweetnessRating());
+        request.setAftertasteRating(review.getAftertasteRating());
+        request.setReviewText(review.getReviewText());
+        request.setWouldBuyAgain(review.isWouldBuyAgain());
+
+        return request;
+    }
     @Transactional
     public Review createReview(
             Long productId,
