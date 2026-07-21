@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title th:text="${product.name + ' | RateMyProtein'}">
+        Product | RateMyProtein
+    </title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">
+            RateMyProtein
+        </a>
+
+        <a class="btn btn-outline-light"
+           th:href="@{/products}">
+            Back to Products
+        </a>
+    </div>
+</nav>
+
+<main class="container py-5">
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+
+            <span class="badge text-bg-secondary mb-3"
+                  th:text="${product.proteinType}">
+                WHEY
+            </span>
+
+            <h1 th:text="${product.name}">
+                Product name
+            </h1>
+
+            <p class="lead text-muted">
+                <span th:text="${product.brand.name}">
+                    Brand
+                </span>
+                —
+                <span th:text="${product.flavor.name}">
+                    Flavor
+                </span>
+            </p>
+
+            <hr>
+
+            <p th:text="${product.description}">
+                Product description
+            </p>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <p>
+                        <strong>Protein per serving:</strong>
+                        <span th:text="${product.proteinPerServing}">24</span> g
+                    </p>
+
+                    <p>
+                        <strong>Calories:</strong>
+                        <span th:text="${product.calories}">120</span>
+                    </p>
+
+                    <p>
+                        <strong>Flavor family:</strong>
+                        <span th:text="${product.flavor.flavorFamily}">
+                            Chocolate
+                        </span>
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <p>
+                        <strong>Price:</strong>
+                        ₾<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">149.90
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Stock quantity:</strong>
+                        <span th:text="${product.stockQuantity}">
+                            20
+                        </span>
+                    </p>
+
+                    <span th:if="${product.stockQuantity > 0}"
+                          class="badge text-bg-success">
+                        In stock
+                    </span>
+
+                    <span th:unless="${product.stockQuantity > 0}"
+                          class="badge text-bg-danger">
+                        Out of stock
+                    </span>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <section>
+                <h2 class="h4">Taste profile</h2>
+
+                <p class="text-muted">
+                    Ratings for taste, sweetness, texture, mixability and
+                    aftertaste will appear here after the review feature is added.
+                </p>
+            </section>
+
+            <button class="btn btn-primary mt-3"
+                    type="button"
+                    disabled>
+                Write a Review
+            </button>
+
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>
