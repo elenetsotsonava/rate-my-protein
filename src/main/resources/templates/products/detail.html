@@ -2,6 +2,7 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
 
@@ -29,15 +30,18 @@
           th:href="@{/css/style.css}">
 </head>
 
-<body class="bg-light">
+<body>
 
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="container py-5">
+
+    <!-- Success and warning messages -->
     <div th:if="${param.reviewAdded}"
          class="alert alert-success">
         Your review was submitted successfully.
     </div>
+
     <div th:if="${param.reviewUpdated}"
          class="alert alert-success">
         Your review was updated successfully.
@@ -47,199 +51,377 @@
          class="alert alert-success">
         Your review was deleted successfully.
     </div>
+
     <div th:if="${param.alreadyReviewed}"
          class="alert alert-warning">
         You have already reviewed this product.
     </div>
 
-    <div class="card app-card">
-        <div class="card-body p-4">
+    <!-- Back link -->
+    <div class="mb-4">
 
-            <span class="badge text-bg-secondary mb-3"
-                  th:text="${product.proteinType}">
+        <a class="text-decoration-none"
+           th:href="@{/products}">
+            ← Back to Products
+        </a>
+
+    </div>
+
+    <!-- Product information -->
+    <article class="card app-card">
+
+        <div class="card-body p-4 p-lg-5">
+
+            <span class="protein-type-badge mb-3"
+                  th:text="${#strings.replace(
+                          product.proteinType.name(),
+                          '_',
+                          ' '
+                  )}">
                 WHEY
             </span>
 
-            <h1 th:text="${product.name}">
+            <h1 class="display-6 fw-bold mt-3 mb-2"
+                th:text="${product.name}">
                 Product name
             </h1>
 
-            <p class="lead text-muted">
+            <p class="lead text-muted-custom mb-4">
+
                 <span th:text="${product.brand.name}">
                     Brand
                 </span>
+
                 —
+
                 <span th:text="${product.flavor.name}">
                     Flavor
                 </span>
+
             </p>
 
             <hr>
 
-            <p th:text="${product.description}">
+            <p class="mt-4"
+               th:text="${product.description}">
                 Product description
             </p>
 
-            <div class="row mt-4">
+            <!-- Product details -->
+            <div class="row g-4 mt-2">
+
                 <div class="col-md-6">
-                    <p>
+
+                    <div class="mb-3">
                         <strong>Protein per serving:</strong>
-                        <span th:text="${product.proteinPerServing}">24</span> g
-                    </p>
 
-                    <p>
+                        <span th:text="${product.proteinPerServing}">
+                            24
+                        </span>
+
+                        g
+                    </div>
+
+                    <div class="mb-3">
                         <strong>Calories:</strong>
-                        <span th:text="${product.calories}">120</span>
-                    </p>
 
-                    <p>
+                        <span th:text="${product.calories}">
+                            120
+                        </span>
+                    </div>
+
+                    <div>
                         <strong>Flavor family:</strong>
+
                         <span th:text="${product.flavor.flavorFamily}">
                             Chocolate
                         </span>
-                    </p>
+                    </div>
+
                 </div>
 
                 <div class="col-md-6">
-                    <p>
-                        <strong>Price:</strong>
-                        ₾<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">149.90
-                        </span>
-                    </p>
 
-                    <p>
+                    <div class="mb-3">
+                        <strong>Price:</strong>
+
+                        <span th:if="${product.price != null}">
+                            ₾<span th:text="${#numbers.formatDecimal(
+                                    product.price,
+                                    1,
+                                    2
+                            )}">
+                                149.90
+                            </span>
+                        </span>
+
+                        <span th:unless="${product.price != null}"
+                              class="text-muted-custom">
+                            Price unavailable
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
                         <strong>Stock quantity:</strong>
+
                         <span th:text="${product.stockQuantity}">
                             20
                         </span>
-                    </p>
+                    </div>
 
-                    <span th:if="${product.stockQuantity > 0}"
-                          class="badge text-bg-success">
+                    <span th:if="${product.stockQuantity != null
+                                 and product.stockQuantity > 0}"
+                          class="stock-badge">
                         In stock
                     </span>
 
-                    <span th:unless="${product.stockQuantity > 0}"
+                    <span th:unless="${product.stockQuantity != null
+                                     and product.stockQuantity > 0}"
                           class="badge text-bg-danger">
                         Out of stock
                     </span>
+
                 </div>
+
             </div>
 
-            <hr class="my-4">
+            <!-- Rating profile -->
+            <section class="rating-summary mt-5">
 
-            <section class="mt-4">
+                <div class="d-flex flex-column flex-md-row
+                            justify-content-between align-items-md-end
+                            gap-3 mb-4">
 
-                <h2 class="h4 mb-3">
-                    Rating Summary
-                </h2>
+                    <div>
 
-                <div th:if="${reviewStats.reviewCount == 0}"
-                     class="alert alert-light border">
-                    This product has no reviews yet.
-                    Be the first person to review it.
-                </div>
+                        <span class="section-label">
+                            Community ratings
+                        </span>
 
-                <div th:if="${reviewStats.reviewCount > 0}">
+                        <h2 class="h3 fw-bold mt-2 mb-0">
+                            Flavor Profile
+                        </h2>
 
-                    <div class="mb-4">
-            <span class="display-6 fw-bold"
-                  th:text="${#numbers.formatDecimal(
-                          reviewStats.averageOverall,
-                          1,
-                          1
-                      )}">
-                4.5
-            </span>
-
-                        <span class="fs-5 text-warning">
-                ★
-            </span>
-
-                        <span class="text-muted">
-                from
-                <span th:text="${reviewStats.reviewCount}">
-                    1
-                </span>
-                review(s)
-            </span>
                     </div>
 
-                    <div class="row g-3">
+                    <div th:if="${reviewStats.reviewCount > 0}"
+                         class="overall-score">
 
-                        <div class="col-md-4">
-                            <div class="border rounded p-3">
-                                <div class="text-muted">Taste</div>
+                        <span class="overall-score-number"
+                              th:text="${#numbers.formatDecimal(
+                                      reviewStats.averageOverall,
+                                      1,
+                                      1
+                              )}">
+                            4.5
+                        </span>
 
-                                <strong th:text="${#numbers.formatDecimal(
-                            reviewStats.averageTaste,
-                            1,
-                            1
-                        )}">
-                                    4.5
-                                </strong>
-                                / 5
+                        <div>
+
+                            <div class="overall-score-stars">
+                                ★
                             </div>
+
+                            <small class="text-muted-custom">
+                                Based on
+
+                                <span th:text="${reviewStats.reviewCount}">
+                                    1
+                                </span>
+
+                                review(s)
+                            </small>
+
                         </div>
 
-                        <div class="col-md-4">
-                            <div class="border rounded p-3">
-                                <div class="text-muted">Texture</div>
+                    </div>
 
-                                <strong th:text="${#numbers.formatDecimal(
-                            reviewStats.averageTexture,
-                            1,
-                            1
-                        )}">
-                                    4.5
-                                </strong>
-                                / 5
-                            </div>
+                </div>
+
+                <!-- No-rating state -->
+                <div th:if="${reviewStats.reviewCount == 0}"
+                     class="app-card p-4 text-center">
+
+                    <h3 class="h5">
+                        No ratings yet
+                    </h3>
+
+                    <p class="text-muted-custom mb-0">
+                        Be the first person to review this product.
+                    </p>
+
+                </div>
+
+                <!-- Rating progress bars -->
+                <div th:if="${reviewStats.reviewCount > 0}"
+                     class="app-card rating-profile-card p-4">
+
+                    <!-- Taste -->
+                    <div class="rating-profile-row">
+
+                        <div class="rating-profile-header">
+
+                            <span>Taste</span>
+
+                            <strong th:text="${#numbers.formatDecimal(
+                                    reviewStats.averageTaste,
+                                    1,
+                                    1
+                            )}">
+                                4.5
+                            </strong>
+
                         </div>
 
-                        <div class="col-md-4">
-                            <div class="border rounded p-3">
-                                <div class="text-muted">Mixability</div>
+                        <div class="progress rating-progress"
+                             role="progressbar"
+                             aria-label="Taste rating"
+                             aria-valuemin="0"
+                             aria-valuemax="5"
+                             th:attr="aria-valuenow=${reviewStats.averageTaste}">
 
-                                <strong th:text="${#numbers.formatDecimal(
-                            reviewStats.averageMixability,
-                            1,
-                            1
-                        )}">
-                                    4.5
-                                </strong>
-                                / 5
+                            <div class="progress-bar"
+                                 th:style="${'width: '
+                                         + (reviewStats.averageTaste * 20)
+                                         + '%'}">
                             </div>
+
                         </div>
 
-                        <div class="col-md-4">
-                            <div class="border rounded p-3">
-                                <div class="text-muted">Sweetness</div>
+                    </div>
 
-                                <strong th:text="${#numbers.formatDecimal(
-                            reviewStats.averageSweetness,
-                            1,
-                            1
-                        )}">
-                                    4.5
-                                </strong>
-                                / 5
-                            </div>
+                    <!-- Texture -->
+                    <div class="rating-profile-row">
+
+                        <div class="rating-profile-header">
+
+                            <span>Texture</span>
+
+                            <strong th:text="${#numbers.formatDecimal(
+                                    reviewStats.averageTexture,
+                                    1,
+                                    1
+                            )}">
+                                4.5
+                            </strong>
+
                         </div>
 
-                        <div class="col-md-4">
-                            <div class="border rounded p-3">
-                                <div class="text-muted">Aftertaste</div>
+                        <div class="progress rating-progress"
+                             role="progressbar"
+                             aria-label="Texture rating"
+                             aria-valuemin="0"
+                             aria-valuemax="5"
+                             th:attr="aria-valuenow=${reviewStats.averageTexture}">
 
-                                <strong th:text="${#numbers.formatDecimal(
-                            reviewStats.averageAftertaste,
-                            1,
-                            1
-                        )}">
-                                    4.5
-                                </strong>
-                                / 5
+                            <div class="progress-bar"
+                                 th:style="${'width: '
+                                         + (reviewStats.averageTexture * 20)
+                                         + '%'}">
                             </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Mixability -->
+                    <div class="rating-profile-row">
+
+                        <div class="rating-profile-header">
+
+                            <span>Mixability</span>
+
+                            <strong th:text="${#numbers.formatDecimal(
+                                    reviewStats.averageMixability,
+                                    1,
+                                    1
+                            )}">
+                                4.5
+                            </strong>
+
+                        </div>
+
+                        <div class="progress rating-progress"
+                             role="progressbar"
+                             aria-label="Mixability rating"
+                             aria-valuemin="0"
+                             aria-valuemax="5"
+                             th:attr="aria-valuenow=${reviewStats.averageMixability}">
+
+                            <div class="progress-bar"
+                                 th:style="${'width: '
+                                         + (reviewStats.averageMixability * 20)
+                                         + '%'}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Sweetness -->
+                    <div class="rating-profile-row">
+
+                        <div class="rating-profile-header">
+
+                            <span>Sweetness</span>
+
+                            <strong th:text="${#numbers.formatDecimal(
+                                    reviewStats.averageSweetness,
+                                    1,
+                                    1
+                            )}">
+                                4.5
+                            </strong>
+
+                        </div>
+
+                        <div class="progress rating-progress"
+                             role="progressbar"
+                             aria-label="Sweetness rating"
+                             aria-valuemin="0"
+                             aria-valuemax="5"
+                             th:attr="aria-valuenow=${reviewStats.averageSweetness}">
+
+                            <div class="progress-bar"
+                                 th:style="${'width: '
+                                         + (reviewStats.averageSweetness * 20)
+                                         + '%'}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Aftertaste -->
+                    <div class="rating-profile-row">
+
+                        <div class="rating-profile-header">
+
+                            <span>Aftertaste</span>
+
+                            <strong th:text="${#numbers.formatDecimal(
+                                    reviewStats.averageAftertaste,
+                                    1,
+                                    1
+                            )}">
+                                4.5
+                            </strong>
+
+                        </div>
+
+                        <div class="progress rating-progress"
+                             role="progressbar"
+                             aria-label="Aftertaste rating"
+                             aria-valuemin="0"
+                             aria-valuemax="5"
+                             th:attr="aria-valuenow=${reviewStats.averageAftertaste}">
+
+                            <div class="progress-bar"
+                                 th:style="${'width: '
+                                         + (reviewStats.averageAftertaste * 20)
+                                         + '%'}">
+                            </div>
+
                         </div>
 
                     </div>
@@ -248,93 +430,114 @@
 
             </section>
 
-            <div sec:authorize="isAuthenticated()">
-                <a class="btn btn-primary mt-3"
+            <!-- Review actions -->
+            <div class="mt-4"
+                 sec:authorize="isAuthenticated()">
+
+                <a class="btn btn-orange"
                    th:href="@{/reviews/products/{id}/new(id=${product.id})}">
                     Write a Review
                 </a>
+
             </div>
 
-            <div sec:authorize="isAnonymous()">
-                <a class="btn btn-outline-primary mt-3"
+            <div class="mt-4"
+                 sec:authorize="isAnonymous()">
+
+                <a class="btn btn-outline-dark"
                    th:href="@{/login}">
                     Log in to Write a Review
                 </a>
+
             </div>
 
         </div>
-    </div>
+
+    </article>
+
+    <!-- Customer reviews -->
     <section class="mt-5">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between
+                    align-items-center mb-4">
 
-            <h2 class="h3 mb-0">
-                Customer Reviews
-            </h2>
+            <div>
 
-            <span class="badge text-bg-secondary"
-                  th:text="${reviewStats.reviewCount}">
-            0
-        </span>
+                <span class="section-label">
+                    Community feedback
+                </span>
 
-        </div>
-
-        <div th:if="${#lists.isEmpty(reviews)}"
-             class="card border-0 shadow-sm">
-
-            <div class="card-body p-4 text-center">
-
-                <h3 class="h5">
-                    No reviews yet
-                </h3>
-
-                <p class="text-muted mb-0">
-                    Sign in and share your experience with this product.
-                </p>
+                <h2 class="h3 fw-bold mt-2 mb-0">
+                    Customer Reviews
+                </h2>
 
             </div>
+
+            <span class="protein-type-badge"
+                  th:text="${reviewStats.reviewCount}">
+                0
+            </span>
+
         </div>
 
+        <!-- No-review state -->
+        <div th:if="${#lists.isEmpty(reviews)}"
+             class="app-card p-5 text-center">
+
+            <h3 class="h5">
+                No reviews yet
+            </h3>
+
+            <p class="text-muted-custom mb-0">
+                Sign in and share your experience with this product.
+            </p>
+
+        </div>
+
+        <!-- Review cards -->
         <div th:unless="${#lists.isEmpty(reviews)}">
 
-            <article class="card border-0 shadow-sm mb-3"
+            <article class="card app-card mb-3"
                      th:each="review : ${reviews}">
 
                 <div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between
-                            align-items-start gap-3 mb-3">
+                    <div class="d-flex flex-column flex-md-row
+                                justify-content-between align-items-md-start
+                                gap-3 mb-3">
 
                         <div>
+
                             <h3 class="h5 mb-1"
                                 th:text="${review.user.firstName
-                                    + ' '
-                                    + review.user.lastName}">
+                                        + ' '
+                                        + review.user.lastName}">
                                 Test User
                             </h3>
 
-                            <span class="text-warning fw-bold">
-                            ★
-                        </span>
+                            <span class="overall-score-stars">
+                                ★
+                            </span>
 
                             <strong th:text="${review.overallRating}">
                                 5
                             </strong>
 
-                            <span class="text-muted">
-                            / 5
-                        </span>
+                            <span class="text-muted-custom">
+                                / 5
+                            </span>
+
                         </div>
 
                         <span th:if="${review.wouldBuyAgain}"
-                              class="badge text-bg-success">
-                        Would buy again
-                    </span>
+                              class="stock-badge">
+                            Would buy again
+                        </span>
 
                         <span th:unless="${review.wouldBuyAgain}"
                               class="badge text-bg-secondary">
-                        Would not buy again
-                    </span>
+                            Would not buy again
+                        </span>
 
                     </div>
 
@@ -345,50 +548,52 @@
 
                     <div class="d-flex flex-wrap gap-2">
 
-                    <span class="badge text-bg-light border">
-                        Taste:
-                        <span th:text="${review.tasteRating}">
-                            5
+                        <span class="badge text-bg-light border">
+                            Taste:
+                            <span th:text="${review.tasteRating}">
+                                5
+                            </span>
                         </span>
-                    </span>
 
                         <span class="badge text-bg-light border">
-                        Texture:
-                        <span th:text="${review.textureRating}">
-                            5
+                            Texture:
+                            <span th:text="${review.textureRating}">
+                                5
+                            </span>
                         </span>
-                    </span>
 
                         <span class="badge text-bg-light border">
-                        Mixability:
-                        <span th:text="${review.mixabilityRating}">
-                            5
+                            Mixability:
+                            <span th:text="${review.mixabilityRating}">
+                                5
+                            </span>
                         </span>
-                    </span>
 
                         <span class="badge text-bg-light border">
-                        Sweetness:
-                        <span th:text="${review.sweetnessRating}">
-                            5
+                            Sweetness:
+                            <span th:text="${review.sweetnessRating}">
+                                5
+                            </span>
                         </span>
-                    </span>
 
                         <span class="badge text-bg-light border">
-                        Aftertaste:
-                        <span th:text="${review.aftertasteRating}">
-                            5
+                            Aftertaste:
+                            <span th:text="${review.aftertasteRating}">
+                                5
+                            </span>
                         </span>
-                    </span>
 
                     </div>
+
+                    <!-- Owner actions -->
                     <div sec:authorize="isAuthenticated()"
                          th:if="${#strings.equalsIgnoreCase(
-        #authentication.name,
-        review.user.email
-    )}"
-                         class="d-flex gap-2 mt-3">
+                                 #authentication.name,
+                                 review.user.email
+                         )}"
+                         class="d-flex gap-2 mt-4">
 
-                        <a class="btn btn-sm btn-outline-primary"
+                        <a class="btn btn-sm btn-outline-dark"
                            th:href="@{/reviews/{id}/edit(id=${review.id})}">
                             Edit
                         </a>
@@ -414,10 +619,13 @@
         </div>
 
     </section>
+
 </main>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
+
 </body>
 </html>

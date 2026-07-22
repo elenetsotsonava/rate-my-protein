@@ -275,3 +275,67 @@ a:hover {
     color: var(--navy);
     font-size: 0.88rem;
 }
+
+.rating-summary {
+    border-top: 1px solid var(--border-color);
+    padding-top: 2rem;
+}
+
+.overall-score {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.overall-score-number {
+    font-family: "Exo 2", sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--navy);
+}
+
+.overall-score-stars {
+    color: var(--orange);
+    font-size: 1.4rem;
+}
+
+.rating-profile-card {
+    display: grid;
+    gap: 1.3rem;
+}
+
+.rating-profile-row {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.rating-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rating-profile-header span {
+    font-weight: 600;
+}
+
+.rating-profile-header strong {
+    color: var(--navy);
+}
+
+.rating-progress {
+    height: 10px;
+    background-color: var(--border-color);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.rating-progress .progress-bar {
+    background: linear-gradient(
+            90deg,
+            var(--orange-dark),
+            var(--orange)
+    );
+    border-radius: 999px;
+}
