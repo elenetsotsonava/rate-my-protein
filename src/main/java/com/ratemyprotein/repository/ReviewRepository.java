@@ -31,4 +31,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "product.flavor"
     })
     List<Review> findAllByOrderByCreatedAtDesc();
+
+    @EntityGraph(attributePaths = {
+            "product",
+            "product.brand",
+            "product.flavor"
+    })
+    List<Review> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

@@ -60,4 +60,16 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    @Transactional(readOnly = true)
+    public AppUser getUserByEmail(String email) {
+
+        return userRepository
+                .findByEmailIgnoreCase(email)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "User account was not found."
+                        )
+                );
+    }
 }

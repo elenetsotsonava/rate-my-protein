@@ -118,4 +118,10 @@ public interface ProductRepository
             p.flavor.name
         """)
     List<Product> findAllManagedProducts();
+
+    @EntityGraph(attributePaths = {
+            "brand",
+            "flavor"
+    })
+    List<Product> findBySubmittedByIdOrderBySubmittedAtDesc(Long userId);
 }

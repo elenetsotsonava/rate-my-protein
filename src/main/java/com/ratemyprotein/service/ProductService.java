@@ -352,4 +352,14 @@ public class ProductService {
 
         return product;
     }
+
+    @Transactional(readOnly = true)
+    public List<Product> getSubmittedProductsByUser(
+            Long userId
+    ) {
+        return productRepository
+                .findBySubmittedByIdOrderBySubmittedAtDesc(
+                        userId
+                );
+    }
 }

@@ -242,4 +242,10 @@ public class ReviewService {
 
         reviewRepository.delete(review);
     }
+
+    @Transactional(readOnly = true)
+    public List<Review> getReviewsByUser(Long userId) {
+        return reviewRepository
+                .findByUserIdOrderByCreatedAtDesc(userId);
+    }
 }
