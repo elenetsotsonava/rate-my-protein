@@ -247,7 +247,10 @@
 
                         <div class="d-flex flex-wrap
                                     justify-content-end gap-2">
-
+                            <a class="btn btn-sm btn-outline-dark"
+                               th:href="@{/admin/products/{id}/edit(id=${product.id})}">
+                                Edit
+                            </a>
                             <a class="btn btn-sm btn-outline-dark"
                                th:if="${product.active}"
                                th:href="@{/products/{id}(id=${product.id})}">

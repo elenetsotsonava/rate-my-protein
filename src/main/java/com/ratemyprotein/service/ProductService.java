@@ -1,5 +1,6 @@
 package com.ratemyprotein.service;
 
+import com.ratemyprotein.dto.ProductEditRequest;
 import com.ratemyprotein.dto.ProductSubmissionRequest;
 import com.ratemyprotein.entity.AppUser;
 import com.ratemyprotein.entity.Brand;
@@ -261,5 +262,94 @@ public class ProductService {
     private boolean isPendingSubmission(Product product) {
         return product.getSubmittedBy() != null
                 && product.getApprovedAt() == null;
+    }
+
+    @Transactional(readOnly = true)
+    public ProductEditRequest getProductEditRequest(Long productId) {
+
+        Product product = getManagedProductForAdmin(productId);
+
+        ProductEditRequest request = new ProductEditRequest();
+
+        request.setName(product.getName());
+        request.setBrandId(product.getBrand().getId());
+        request.setFlavorId(product.getFlavor().getId());
+        request.setProteinType(product.getProteinType());
+        request.setDescription(product.getDescription());
+        request.setProteinPerServing(
+                product.getProteinPerServing()
+        );
+        request.setCalories(product.getCalories());
+        request.setPrice(product.getPrice());
+        request.setStockQuantity(product.getStockQuantity());
+        request.setImageUrl(product.getImageUrl());
+
+        return request;
+    }
+
+    @Transactional
+    public Product updateProduct(
+            Long productId,
+            ProductEditRequest request
+    ) {
+        Product product = getManagedProductForAdmin(productId);
+
+        Brand brand = brandRepository
+                .findById(request.getBrandId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Selected brand was not found."
+                        )
+                );
+
+        Flavor flavor = flavorRepository
+                .findById(request.getFlavorId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Selected flavor was not found."
+                        )
+                );
+
+        product.setName(request.getName().trim());
+        product.setBrand(brand);
+        product.setFlavor(flavor);
+        product.setProteinType(request.getProteinType());
+
+        product.setDescription(
+                normalizeOptionalText(request.getDescription())
+        );
+
+        product.setProteinPerServing(
+                request.getProteinPerServing()
+        );
+
+        product.setCalories(request.getCalories());
+        product.setPrice(request.getPrice());
+        product.setStockQuantity(request.getStockQuantity());
+
+        product.setImageUrl(
+                normalizeOptionalText(request.getImageUrl())
+        );
+
+        return productRepository.save(product);
+    }
+
+    private Product getManagedProductForAdmin(Long productId) {
+
+        Product product = productRepository
+                .findById(productId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Product was not found."
+                        )
+                );
+
+        if (isPendingSubmission(product)) {
+            throw new IllegalArgumentException(
+                    "Pending submissions must be approved before editing."
+            );
+        }
+
+        return product;
     }
 }

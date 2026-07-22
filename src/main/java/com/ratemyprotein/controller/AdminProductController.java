@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.ratemyprotein.dto.ProductEditRequest;
+import com.ratemyprotein.entity.ProteinType;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.List;
 
@@ -174,5 +179,91 @@ public class AdminProductController {
         }
 
         return "redirect:/admin/products";
+    }
+    @GetMapping("/{id}/edit")
+    public String showEditProductForm(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            model.addAttribute(
+                    "productEditRequest",
+                    productService.getProductEditRequest(id)
+            );
+
+            model.addAttribute("productId", id);
+            addEditFormOptions(model);
+
+            return "admin/products/edit";
+
+        } catch (IllegalArgumentException exception) {
+
+            redirectAttributes.addFlashAttribute(
+                    "catalogueError",
+                    exception.getMessage()
+            );
+
+            return "redirect:/admin/products";
+        }
+    }
+
+    @PostMapping("/{id}/edit")
+    public String updateProduct(
+            @PathVariable Long id,
+            @Valid
+            @ModelAttribute("productEditRequest")
+            ProductEditRequest request,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("productId", id);
+            addEditFormOptions(model);
+
+            return "admin/products/edit";
+        }
+
+        try {
+            productService.updateProduct(id, request);
+
+        } catch (IllegalArgumentException exception) {
+
+            bindingResult.reject(
+                    "productEditError",
+                    exception.getMessage()
+            );
+
+            model.addAttribute("productId", id);
+            addEditFormOptions(model);
+
+            return "admin/products/edit";
+        }
+
+        redirectAttributes.addFlashAttribute(
+                "catalogueSuccess",
+                "The product was updated successfully."
+        );
+
+        return "redirect:/admin/products";
+    }
+
+    private void addEditFormOptions(Model model) {
+
+        model.addAttribute(
+                "brands",
+                productService.getAllBrands()
+        );
+
+        model.addAttribute(
+                "flavors",
+                productService.getAllFlavors()
+        );
+
+        model.addAttribute(
+                "proteinTypes",
+                ProteinType.values()
+        );
     }
 }
