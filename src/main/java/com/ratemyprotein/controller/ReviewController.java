@@ -1,8 +1,8 @@
 package com.ratemyprotein.controller;
 
-import com.ratemyprotein.entity.Review;
 import com.ratemyprotein.dto.ReviewRequest;
 import com.ratemyprotein.entity.Product;
+import com.ratemyprotein.entity.Review;
 import com.ratemyprotein.service.ProductService;
 import com.ratemyprotein.service.ReviewService;
 import jakarta.validation.Valid;
@@ -30,6 +30,9 @@ public class ReviewController {
         this.productService = productService;
     }
 
+    /*
+     * Display the new-review form.
+     */
     @GetMapping("/reviews/products/{productId}/new")
     public String showReviewForm(
             @PathVariable Long productId,
@@ -53,10 +56,71 @@ public class ReviewController {
                 new ReviewRequest()
         );
         model.addAttribute("editMode", false);
+        model.addAttribute("reviewId", null);
 
         return "reviews/form";
     }
 
+    /*
+     * Save a new review.
+     */
+    @PostMapping("/reviews/products/{productId}")
+    public String submitReview(
+            @PathVariable Long productId,
+            @Valid
+            @ModelAttribute("reviewRequest")
+            ReviewRequest reviewRequest,
+            BindingResult bindingResult,
+            Principal principal,
+            Model model
+    ) {
+        Product product = productService.getProductById(productId);
+
+        /*
+         * When validation fails, restore all model attributes
+         * required by reviews/form.html.
+         */
+        if (bindingResult.hasErrors()) {
+            addNewReviewFormAttributes(
+                    model,
+                    product
+            );
+
+            return "reviews/form";
+        }
+
+        try {
+            reviewService.createReview(
+                    productId,
+                    principal.getName(),
+                    reviewRequest
+            );
+
+        } catch (
+                IllegalArgumentException |
+                IllegalStateException exception
+        ) {
+            bindingResult.reject(
+                    "review.failed",
+                    exception.getMessage()
+            );
+
+            addNewReviewFormAttributes(
+                    model,
+                    product
+            );
+
+            return "reviews/form";
+        }
+
+        return "redirect:/products/"
+                + productId
+                + "?reviewAdded";
+    }
+
+    /*
+     * Display the edit-review form.
+     */
     @GetMapping("/reviews/{reviewId}/edit")
     public String showEditForm(
             @PathVariable Long reviewId,
@@ -69,12 +133,11 @@ public class ReviewController {
                     principal.getName()
             );
 
-            model.addAttribute(
-                    "product",
-                    productService.getProductById(
-                            review.getProduct().getId()
-                    )
+            Product product = productService.getProductById(
+                    review.getProduct().getId()
             );
+
+            model.addAttribute("product", product);
 
             model.addAttribute(
                     "reviewRequest",
@@ -91,9 +154,15 @@ public class ReviewController {
 
         } catch (SecurityException exception) {
             return "redirect:/products?forbidden";
+
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/products?reviewNotFound";
         }
     }
 
+    /*
+     * Update an existing review.
+     */
     @PostMapping("/reviews/{reviewId}/edit")
     public String updateReview(
             @PathVariable Long reviewId,
@@ -111,8 +180,12 @@ public class ReviewController {
                     reviewId,
                     principal.getName()
             );
+
         } catch (SecurityException exception) {
             return "redirect:/products?forbidden";
+
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/products?reviewNotFound";
         }
 
         Product product = productService.getProductById(
@@ -120,24 +193,48 @@ public class ReviewController {
         );
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("product", product);
-            model.addAttribute("reviewId", reviewId);
-            model.addAttribute("editMode", true);
+            addEditReviewFormAttributes(
+                    model,
+                    product,
+                    reviewId
+            );
 
             return "reviews/form";
         }
 
-        reviewService.updateReview(
-                reviewId,
-                principal.getName(),
-                reviewRequest
-        );
+        try {
+            reviewService.updateReview(
+                    reviewId,
+                    principal.getName(),
+                    reviewRequest
+            );
+
+        } catch (
+                IllegalArgumentException |
+                IllegalStateException exception
+        ) {
+            bindingResult.reject(
+                    "review.failed",
+                    exception.getMessage()
+            );
+
+            addEditReviewFormAttributes(
+                    model,
+                    product,
+                    reviewId
+            );
+
+            return "reviews/form";
+        }
 
         return "redirect:/products/"
                 + product.getId()
                 + "?reviewUpdated";
     }
 
+    /*
+     * Delete a review belonging to the logged-in user.
+     */
     @PostMapping("/reviews/{reviewId}/delete")
     public String deleteReview(
             @PathVariable Long reviewId,
@@ -155,48 +252,28 @@ public class ReviewController {
 
         } catch (SecurityException exception) {
             return "redirect:/products?forbidden";
+
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/products?reviewNotFound";
         }
     }
 
-    @PostMapping("/reviews/products/{productId}")
-    public String submitReview(
-            @PathVariable Long productId,
-            @Valid
-            @ModelAttribute("reviewRequest")
-            ReviewRequest reviewRequest,
-            BindingResult bindingResult,
-            Principal principal,
-            Model model
+    private void addNewReviewFormAttributes(
+            Model model,
+            Product product
     ) {
-        Product product = productService.getProductById(productId);
+        model.addAttribute("product", product);
+        model.addAttribute("editMode", false);
+        model.addAttribute("reviewId", null);
+    }
 
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("product", product);
-            return "reviews/form";
-        }
-
-        try {
-            reviewService.createReview(
-                    productId,
-                    principal.getName(),
-                    reviewRequest
-            );
-        } catch (
-                IllegalArgumentException |
-                IllegalStateException exception
-        ) {
-            bindingResult.reject(
-                    "review.failed",
-                    exception.getMessage()
-            );
-
-            model.addAttribute("product", product);
-
-            return "reviews/form";
-        }
-
-        return "redirect:/products/"
-                + productId
-                + "?reviewAdded";
+    private void addEditReviewFormAttributes(
+            Model model,
+            Product product,
+            Long reviewId
+    ) {
+        model.addAttribute("product", product);
+        model.addAttribute("editMode", true);
+        model.addAttribute("reviewId", reviewId);
     }
 }

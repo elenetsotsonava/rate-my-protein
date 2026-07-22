@@ -8,12 +8,27 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1">
 
-    <title th:text="${'Review ' + product.name + ' | RateMyProtein'}">
+    <title th:text="${(editMode != null and editMode)
+            ? 'Edit Review | RateMyProtein'
+            : 'Write Review | RateMyProtein'}">
         Write Review | RateMyProtein
     </title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Exo+2:wght@600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          th:href="@{/css/style.css}">
 
     <style>
         body {
@@ -26,29 +41,17 @@
             border-radius: 18px;
             box-shadow: 0 16px 45px rgba(13, 27, 46, 0.09);
         }
-
-        .btn-orange {
-            background: #f97316;
-            border-color: #f97316;
-            color: white;
-        }
-
-        .btn-orange:hover {
-            background: #dc5f0b;
-            border-color: #dc5f0b;
-            color: white;
-        }
     </style>
 </head>
 
 <body>
 
 <nav class="navbar bg-white border-bottom">
-    <div class="container">
+    <div class="container py-2">
 
         <a class="navbar-brand fw-bold"
            th:href="@{/}">
-            RateMyProtein
+            RateMy<span class="brand-accent">Protein</span>
         </a>
 
         <a class="btn btn-outline-dark"
@@ -65,18 +68,19 @@
 
         <div class="col-lg-8">
 
-            <div class="card review-card">
+            <section class="card review-card">
 
                 <div class="card-body p-4 p-md-5">
 
                     <h1 class="h2 fw-bold"
-                        th:text="${editMode}
-            ? 'Edit Your Review'
-            : 'Write a Review'">
+                        th:text="${(editMode != null and editMode)
+                                ? 'Edit Your Review'
+                                : 'Write a Review'}">
                         Write a Review
                     </h1>
 
                     <p class="text-secondary mb-4">
+
                         <span th:text="${product.brand.name}">
                             Brand
                         </span>
@@ -92,20 +96,22 @@
                         <span th:text="${product.flavor.name}">
                             Flavor
                         </span>
+
                     </p>
 
-                    <form th:action="${editMode
-        ? '/reviews/' + reviewId + '/edit'
-        : '/reviews/products/' + product.id}"
+                    <form th:action="${(editMode != null and editMode)
+                            ? '/reviews/' + reviewId + '/edit'
+                            : '/reviews/products/' + product.id}"
                           th:object="${reviewRequest}"
                           method="post"
                           novalidate>
 
+                        <!-- Global errors -->
                         <div th:if="${#fields.hasGlobalErrors()}"
                              class="alert alert-danger">
 
                             <p th:each="error : ${#fields.globalErrors()}"
-                               th:text="${error}"
+                               th:text="${error.defaultMessage}"
                                class="mb-0">
                                 Review error
                             </p>
@@ -114,7 +120,9 @@
 
                         <div class="row">
 
+                            <!-- Overall rating -->
                             <div class="col-md-6 mb-3">
+
                                 <label class="form-label"
                                        for="overallRating">
                                     Overall rating
@@ -122,28 +130,45 @@
 
                                 <select id="overallRating"
                                         class="form-select"
-                                        th:classappend="${#fields.hasErrors('overallRating')}
-                                                ? 'is-invalid' : ''"
-                                        th:field="*{overallRating}">
+                                        th:field="*{overallRating}"
+                                        th:errorclass="is-invalid">
 
                                     <option value="">
-                                        Select a rating
+                                        Select overall rating
                                     </option>
 
-                                    <option value="5">5 — Excellent</option>
-                                    <option value="4">4 — Very good</option>
-                                    <option value="3">3 — Average</option>
-                                    <option value="2">2 — Poor</option>
-                                    <option value="1">1 — Very poor</option>
+                                    <option value="5">
+                                        5 — Excellent
+                                    </option>
+
+                                    <option value="4">
+                                        4 — Very good
+                                    </option>
+
+                                    <option value="3">
+                                        3 — Average
+                                    </option>
+
+                                    <option value="2">
+                                        2 — Poor
+                                    </option>
+
+                                    <option value="1">
+                                        1 — Very poor
+                                    </option>
+
                                 </select>
 
                                 <div class="invalid-feedback"
                                      th:errors="*{overallRating}">
-                                    Rating error
+                                    Overall rating is required.
                                 </div>
+
                             </div>
 
+                            <!-- Taste -->
                             <div class="col-md-6 mb-3">
+
                                 <label class="form-label"
                                        for="tasteRating">
                                     Taste
@@ -151,21 +176,31 @@
 
                                 <select id="tasteRating"
                                         class="form-select"
-                                        th:field="*{tasteRating}">
-                                    <option value="">Select a rating</option>
+                                        th:field="*{tasteRating}"
+                                        th:errorclass="is-invalid">
+
+                                    <option value="">
+                                        Select taste rating
+                                    </option>
+
                                     <option value="5">5</option>
                                     <option value="4">4</option>
                                     <option value="3">3</option>
                                     <option value="2">2</option>
                                     <option value="1">1</option>
+
                                 </select>
 
-                                <div class="text-danger small"
+                                <div class="invalid-feedback"
                                      th:errors="*{tasteRating}">
+                                    Taste rating is required.
                                 </div>
+
                             </div>
 
+                            <!-- Texture -->
                             <div class="col-md-6 mb-3">
+
                                 <label class="form-label"
                                        for="textureRating">
                                     Texture
@@ -173,21 +208,31 @@
 
                                 <select id="textureRating"
                                         class="form-select"
-                                        th:field="*{textureRating}">
-                                    <option value="">Select a rating</option>
+                                        th:field="*{textureRating}"
+                                        th:errorclass="is-invalid">
+
+                                    <option value="">
+                                        Select texture rating
+                                    </option>
+
                                     <option value="5">5</option>
                                     <option value="4">4</option>
                                     <option value="3">3</option>
                                     <option value="2">2</option>
                                     <option value="1">1</option>
+
                                 </select>
 
-                                <div class="text-danger small"
+                                <div class="invalid-feedback"
                                      th:errors="*{textureRating}">
+                                    Texture rating is required.
                                 </div>
+
                             </div>
 
+                            <!-- Mixability -->
                             <div class="col-md-6 mb-3">
+
                                 <label class="form-label"
                                        for="mixabilityRating">
                                     Mixability
@@ -195,21 +240,31 @@
 
                                 <select id="mixabilityRating"
                                         class="form-select"
-                                        th:field="*{mixabilityRating}">
-                                    <option value="">Select a rating</option>
+                                        th:field="*{mixabilityRating}"
+                                        th:errorclass="is-invalid">
+
+                                    <option value="">
+                                        Select mixability rating
+                                    </option>
+
                                     <option value="5">5</option>
                                     <option value="4">4</option>
                                     <option value="3">3</option>
                                     <option value="2">2</option>
                                     <option value="1">1</option>
+
                                 </select>
 
-                                <div class="text-danger small"
+                                <div class="invalid-feedback"
                                      th:errors="*{mixabilityRating}">
+                                    Mixability rating is required.
                                 </div>
+
                             </div>
 
+                            <!-- Sweetness -->
                             <div class="col-md-6 mb-3">
+
                                 <label class="form-label"
                                        for="sweetnessRating">
                                     Sweetness
@@ -217,21 +272,31 @@
 
                                 <select id="sweetnessRating"
                                         class="form-select"
-                                        th:field="*{sweetnessRating}">
-                                    <option value="">Select a rating</option>
+                                        th:field="*{sweetnessRating}"
+                                        th:errorclass="is-invalid">
+
+                                    <option value="">
+                                        Select sweetness rating
+                                    </option>
+
                                     <option value="5">5</option>
                                     <option value="4">4</option>
                                     <option value="3">3</option>
                                     <option value="2">2</option>
                                     <option value="1">1</option>
+
                                 </select>
 
-                                <div class="text-danger small"
+                                <div class="invalid-feedback"
                                      th:errors="*{sweetnessRating}">
+                                    Sweetness rating is required.
                                 </div>
+
                             </div>
 
+                            <!-- Aftertaste -->
                             <div class="col-md-6 mb-3">
+
                                 <label class="form-label"
                                        for="aftertasteRating">
                                     Aftertaste
@@ -239,45 +304,59 @@
 
                                 <select id="aftertasteRating"
                                         class="form-select"
-                                        th:field="*{aftertasteRating}">
-                                    <option value="">Select a rating</option>
+                                        th:field="*{aftertasteRating}"
+                                        th:errorclass="is-invalid">
+
+                                    <option value="">
+                                        Select aftertaste rating
+                                    </option>
+
                                     <option value="5">5</option>
                                     <option value="4">4</option>
                                     <option value="3">3</option>
                                     <option value="2">2</option>
                                     <option value="1">1</option>
+
                                 </select>
 
-                                <div class="text-danger small"
+                                <div class="invalid-feedback"
                                      th:errors="*{aftertasteRating}">
+                                    Aftertaste rating is required.
                                 </div>
+
                             </div>
 
                         </div>
 
+                        <!-- Optional written review -->
                         <div class="mb-3">
 
                             <label class="form-label"
                                    for="reviewText">
                                 Your review
+
+                                <span class="text-muted">
+                                    (optional)
+                                </span>
                             </label>
 
                             <textarea id="reviewText"
                                       class="form-control"
                                       rows="6"
                                       maxlength="2000"
-                                      th:classappend="${#fields.hasErrors('reviewText')}
-                                              ? 'is-invalid' : ''"
-                                      th:field="*{reviewText}">
+                                      th:field="*{reviewText}"
+                                      th:errorclass="is-invalid"
+                                      placeholder="Share more details about your experience if you would like.">
                             </textarea>
 
                             <div class="invalid-feedback"
                                  th:errors="*{reviewText}">
-                                Review-text error
+                                Review text error
                             </div>
 
                         </div>
 
+                        <!-- Buy again -->
                         <div class="form-check mb-4">
 
                             <input id="wouldBuyAgain"
@@ -292,28 +371,38 @@
 
                         </div>
 
-                        <button class="btn btn-orange"
-                                type="submit"
-                                th:text="${editMode}
-                ? 'Save Changes'
-                : 'Submit Review'">
-                            Submit Review
-                        </button>
+                        <!-- Actions -->
+                        <div class="d-flex flex-wrap gap-2">
 
-                        <a class="btn btn-outline-secondary"
-                           th:href="@{/products/{id}(id=${product.id})}">
-                            Cancel
-                        </a>
+                            <button class="btn btn-orange"
+                                    type="submit"
+                                    th:text="${(editMode != null and editMode)
+                                            ? 'Save Changes'
+                                            : 'Submit Review'}">
+                                Submit Review
+                            </button>
+
+                            <a class="btn btn-outline-secondary"
+                               th:href="@{/products/{id}(id=${product.id})}">
+                                Cancel
+                            </a>
+
+                        </div>
 
                     </form>
 
                 </div>
-            </div>
+
+            </section>
 
         </div>
+
     </div>
 
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
 
 </body>
 </html>
