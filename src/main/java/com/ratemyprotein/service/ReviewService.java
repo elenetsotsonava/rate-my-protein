@@ -224,4 +224,22 @@ public class ReviewService {
                         )
                 );
     }
+    @Transactional(readOnly = true)
+    public List<Review> getAllReviewsForAdmin() {
+        return reviewRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    @Transactional
+    public void deleteReviewAsAdmin(Long reviewId) {
+
+        Review review = reviewRepository
+                .findById(reviewId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Review was not found."
+                        )
+                );
+
+        reviewRepository.delete(review);
+    }
 }

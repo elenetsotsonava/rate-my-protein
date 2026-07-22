@@ -23,4 +23,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     );
 
     long countByProductId(Long productId);
+
+    @EntityGraph(attributePaths = {
+            "user",
+            "product",
+            "product.brand",
+            "product.flavor"
+    })
+    List<Review> findAllByOrderByCreatedAtDesc();
 }
