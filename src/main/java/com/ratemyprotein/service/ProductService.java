@@ -1,5 +1,7 @@
 package com.ratemyprotein.service;
 
+import com.ratemyprotein.dto.ProductSubmissionRequest;
+import com.ratemyprotein.entity.AppUser;
 import com.ratemyprotein.entity.Brand;
 import com.ratemyprotein.entity.Flavor;
 import com.ratemyprotein.entity.Product;
@@ -7,12 +9,12 @@ import com.ratemyprotein.entity.ProteinType;
 import com.ratemyprotein.repository.BrandRepository;
 import com.ratemyprotein.repository.FlavorRepository;
 import com.ratemyprotein.repository.ProductRepository;
+import com.ratemyprotein.repository.UserRepository;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,15 +23,18 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
     private final FlavorRepository flavorRepository;
+    private final UserRepository userRepository;
 
     public ProductService(
             ProductRepository productRepository,
             BrandRepository brandRepository,
-            FlavorRepository flavorRepository
+            FlavorRepository flavorRepository,
+            UserRepository userRepository
     ) {
         this.productRepository = productRepository;
         this.brandRepository = brandRepository;
         this.flavorRepository = flavorRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -57,20 +62,15 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Product getProductById(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Product not found"
-                ));
-
-        if (!Boolean.TRUE.equals(product.getActive())) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Product not found"
-            );
-        }
-
-        return product;
+        return productRepository.findById(id)
+                .filter(product ->
+                        Boolean.TRUE.equals(product.getActive())
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Product not found."
+                        )
+                );
     }
 
     @Transactional(readOnly = true)
@@ -91,5 +91,86 @@ public class ProductService {
                         "name"
                 )
         );
+    }
+
+    /**
+     * Creates a product submitted by a logged-in user.
+     *
+     * The product is inactive until an administrator approves it.
+     */
+    @Transactional
+    public Product submitProduct(
+            ProductSubmissionRequest request,
+            String userEmail
+    ) {
+        AppUser submittingUser = userRepository
+                .findByEmailIgnoreCase(userEmail)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Logged-in user was not found."
+                        )
+                );
+
+        Brand brand = brandRepository
+                .findById(request.getBrandId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Selected brand was not found."
+                        )
+                );
+
+        Flavor flavor = flavorRepository
+                .findById(request.getFlavorId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Selected flavor was not found."
+                        )
+                );
+
+        Product product = new Product();
+
+        product.setName(request.getName().trim());
+        product.setBrand(brand);
+        product.setFlavor(flavor);
+        product.setProteinType(request.getProteinType());
+
+        product.setDescription(
+                normalizeOptionalText(request.getDescription())
+        );
+
+        product.setProteinPerServing(
+                request.getProteinPerServing()
+        );
+
+        product.setCalories(request.getCalories());
+        product.setPrice(request.getPrice());
+
+        product.setImageUrl(
+                normalizeOptionalText(request.getImageUrl())
+        );
+
+        /*
+         * User submissions are not immediately public.
+         */
+        product.setActive(false);
+
+        /*
+         * RateMyProtein currently functions as a review platform,
+         * so users cannot define shop inventory.
+         */
+        product.setStockQuantity(0);
+
+        product.setSubmittedBy(submittingUser);
+        product.setSubmittedAt(LocalDateTime.now());
+
+        return productRepository.save(product);
+    }
+
+    private String normalizeOptionalText(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value.trim();
     }
 }

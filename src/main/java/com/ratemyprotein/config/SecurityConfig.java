@@ -23,17 +23,25 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
 
-                        // Public pages
+                        // Public pages that are not under /products/**
                         .requestMatchers(
                                 "/",
-                                "/products",
-                                "/products/**",
                                 "/register",
                                 "/login",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
                                 "/error"
+                        ).permitAll()
+
+                        // Must appear before the public /products/** rule
+                        .requestMatchers("/products/submit")
+                        .authenticated()
+
+                        // Public product catalogue and detail pages
+                        .requestMatchers(
+                                "/products",
+                                "/products/**"
                         ).permitAll()
 
                         // Administrator pages

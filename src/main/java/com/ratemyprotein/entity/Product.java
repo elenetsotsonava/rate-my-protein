@@ -1,23 +1,23 @@
 package com.ratemyprotein.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "products",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_product_brand_name_flavor",
-                        columnNames = {
-                                "brand_id",
-                                "name",
-                                "flavor_id"
-                        }
-                )
-        }
-)
+@Table(name = "products")
 public class Product {
 
     @Id
@@ -40,11 +40,31 @@ public class Product {
     )
     private Flavor flavor;
 
+    /*
+     * The user who submitted this product.
+     *
+     * This field is nullable because products created by the
+     * system or an administrator may not have a submitting user.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "submitted_by_user_id",
+            foreignKey = @ForeignKey(name = "fk_product_submitted_by")
+    )
+    private AppUser submittedBy;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
     @Column(nullable = false, length = 150)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "protein_type", nullable = false, length = 30)
+    @Column(
+            name = "protein_type",
+            nullable = false,
+            length = 30
+    )
     private ProteinType proteinType;
 
     @Column(length = 2000)
@@ -64,6 +84,13 @@ public class Product {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    /*
+     * active = true:
+     * The product is approved and publicly visible.
+     *
+     * active = false:
+     * The product is pending approval or deactivated.
+     */
     @Column(nullable = false)
     private Boolean active = true;
 
@@ -92,6 +119,14 @@ public class Product {
 
     public Flavor getFlavor() {
         return flavor;
+    }
+
+    public AppUser getSubmittedBy() {
+        return submittedBy;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
     }
 
     public String getName() {
@@ -136,6 +171,14 @@ public class Product {
 
     public void setFlavor(Flavor flavor) {
         this.flavor = flavor;
+    }
+
+    public void setSubmittedBy(AppUser submittedBy) {
+        this.submittedBy = submittedBy;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
     }
 
     public void setName(String name) {
