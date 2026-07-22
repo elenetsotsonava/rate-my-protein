@@ -436,3 +436,34 @@ a:hover {
     display: block;
     line-height: 1.35;
 }
+
+.error-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.error-card {
+    width: min(100%, 720px);
+    padding: 3rem;
+    text-align: center;
+}
+
+.error-code {
+    font-family: "Exo 2", sans-serif;
+    font-size: clamp(5rem, 15vw, 9rem);
+    font-weight: 800;
+    line-height: 0.9;
+    color: var(--navy);
+    opacity: 0.1;
+    margin-bottom: -0.75rem;
+}
+
+@media (max-width: 576px) {
+    .error-card {
+        padding: 2rem 1.25rem;
+    }
+}
