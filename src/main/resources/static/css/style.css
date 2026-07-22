@@ -339,3 +339,36 @@ a:hover {
     );
     border-radius: 999px;
 }
+
+.ranking-position {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background-color: var(--navy);
+    color: white;
+    font-family: "Exo 2", sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.ranking-stat {
+    display: grid;
+    min-width: 110px;
+    gap: 0.2rem;
+}
+
+.ranking-stat-label {
+    color: var(--muted-text);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.ranking-stat strong {
+    color: var(--navy);
+    font-size: 1.1rem;
+}
