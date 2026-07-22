@@ -20,63 +20,84 @@ public interface ProductRepository
     @EntityGraph(attributePaths = {"brand", "flavor"})
     Optional<Product> findById(Long id);
 
-    List<Product> findByBrandIdAndActiveTrue(Long brandId);
+    @EntityGraph(attributePaths = {"brand", "flavor"})
+    @Query("""
+            SELECT p
+            FROM Product p
+            WHERE p.active = true
 
-    List<Product> findByFlavorIdAndActiveTrue(Long flavorId);
+              AND (
+                    :search = ''
+                    OR LOWER(p.name) LIKE LOWER(
+                        CONCAT('%', :search, '%')
+                    )
+                    OR LOWER(p.brand.name) LIKE LOWER(
+                        CONCAT('%', :search, '%')
+                    )
+                    OR LOWER(p.flavor.name) LIKE LOWER(
+                        CONCAT('%', :search, '%')
+                    )
+              )
 
-    List<Product> findByProteinTypeAndActiveTrue(
-            ProteinType proteinType
+              AND (
+                    :brandId IS NULL
+                    OR p.brand.id = :brandId
+              )
+
+              AND (
+                    :flavorId IS NULL
+                    OR p.flavor.id = :flavorId
+              )
+
+              AND (
+                    :proteinType IS NULL
+                    OR p.proteinType = :proteinType
+              )
+
+            ORDER BY
+                p.brand.name,
+                p.name,
+                p.flavor.name
+            """)
+    List<Product> searchActiveProducts(
+            @Param("search") String search,
+            @Param("brandId") Long brandId,
+            @Param("flavorId") Long flavorId,
+            @Param("proteinType") ProteinType proteinType
+    );
+
+    /*
+     * Add the new pending-submission methods here,
+     * after searchActiveProducts().
+     */
+
+    @EntityGraph(attributePaths = {
+            "brand",
+            "flavor",
+            "submittedBy"
+    })
+    List<Product>
+    findByActiveFalseAndSubmittedByIsNotNullOrderBySubmittedAtAsc();
+
+    @EntityGraph(attributePaths = {
+            "brand",
+            "flavor",
+            "submittedBy"
+    })
+    @Query("""
+            SELECT p
+            FROM Product p
+            WHERE p.id = :id
+              AND p.active = false
+              AND p.submittedBy IS NOT NULL
+            """)
+    Optional<Product> findPendingSubmissionById(
+            @Param("id") Long id
     );
 
     boolean existsByBrandIdAndNameIgnoreCaseAndFlavorId(
             Long brandId,
             String name,
             Long flavorId
-    );
-
-    @EntityGraph(attributePaths = {"brand", "flavor"})
-    @Query("""
-        SELECT p
-        FROM Product p
-        WHERE p.active = true
-
-          AND (
-                :search = ''
-                OR LOWER(p.name) LIKE LOWER(
-                    CONCAT('%', :search, '%')
-                )
-                OR LOWER(p.brand.name) LIKE LOWER(
-                    CONCAT('%', :search, '%')
-                )
-                OR LOWER(p.flavor.name) LIKE LOWER(
-                    CONCAT('%', :search, '%')
-                )
-          )
-
-          AND (
-                :brandId IS NULL
-                OR p.brand.id = :brandId
-          )
-
-          AND (
-                :flavorId IS NULL
-                OR p.flavor.id = :flavorId
-          )
-
-          AND (
-                :proteinType IS NULL
-                OR p.proteinType = :proteinType
-          )
-
-        ORDER BY
-            p.brand.name,
-            p.name,
-            p.flavor.name
-        """)
-    List<Product> searchActiveProducts(
-            @Param("search") String search,
-            @Param("brandId") Long brandId,
-            @Param("flavorId") Long flavorId,
-            @Param("proteinType") ProteinType proteinType
     );
 }

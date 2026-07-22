@@ -372,3 +372,67 @@ a:hover {
     color: var(--navy);
     font-size: 1.1rem;
 }
+
+.pending-product-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.1rem;
+}
+
+.pending-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    background-color: #f5c928;
+    color: #1b2432;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.pending-product-badges .protein-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    margin: 0;
+}
+
+.pending-product-card {
+    padding: 1.75rem !important;
+}
+
+.pending-product-card .product-brand {
+    margin-bottom: 0.35rem;
+}
+
+.pending-product-card .product-flavor {
+    margin-top: 0.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.pending-product-card h2 {
+    margin-bottom: 0.25rem;
+}
+
+.pending-meta-box {
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background-color: #ffffff;
+}
+
+.pending-meta-box small {
+    margin-bottom: 0.25rem;
+}
+
+.pending-meta-box strong {
+    display: block;
+    line-height: 1.35;
+}

@@ -173,4 +173,40 @@ public class ProductService {
 
         return value.trim();
     }
+
+    @Transactional(readOnly = true)
+    public List<Product> getPendingProductSubmissions() {
+        return productRepository
+                .findByActiveFalseAndSubmittedByIsNotNullOrderBySubmittedAtAsc();
+    }
+
+    @Transactional
+    public Product approveProductSubmission(Long productId) {
+
+        Product product = productRepository
+                .findPendingSubmissionById(productId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Pending product submission was not found."
+                        )
+                );
+
+        product.setActive(true);
+
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public void rejectProductSubmission(Long productId) {
+
+        Product product = productRepository
+                .findPendingSubmissionById(productId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Pending product submission was not found."
+                        )
+                );
+
+        productRepository.delete(product);
+    }
 }
