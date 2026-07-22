@@ -1,5 +1,6 @@
 package com.ratemyprotein.controller;
 
+import com.ratemyprotein.entity.Product;
 import com.ratemyprotein.service.ProductService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/products")
@@ -21,6 +24,47 @@ public class AdminProductController {
         this.productService = productService;
     }
 
+    /*
+     * Main catalogue-management page.
+     */
+    @GetMapping
+    public String showManagedProducts(Model model) {
+
+        List<Product> products =
+                productService.getManagedProducts();
+
+        long activeProductCount = products.stream()
+                .filter(product ->
+                        Boolean.TRUE.equals(product.getActive())
+                )
+                .count();
+
+        long inactiveProductCount =
+                products.size() - activeProductCount;
+
+        model.addAttribute("products", products);
+        model.addAttribute(
+                "activeProductCount",
+                activeProductCount
+        );
+        model.addAttribute(
+                "inactiveProductCount",
+                inactiveProductCount
+        );
+
+        model.addAttribute(
+                "pendingProductCount",
+                productService
+                        .getPendingProductSubmissions()
+                        .size()
+        );
+
+        return "admin/products/list";
+    }
+
+    /*
+     * Pending user submissions.
+     */
     @GetMapping("/pending")
     public String showPendingProducts(Model model) {
 
@@ -32,6 +76,9 @@ public class AdminProductController {
         return "admin/products/pending";
     }
 
+    /*
+     * Approve a pending user submission.
+     */
     @PostMapping("/{id}/approve")
     public String approveProduct(
             @PathVariable Long id,
@@ -54,6 +101,9 @@ public class AdminProductController {
         return "redirect:/admin/products/pending";
     }
 
+    /*
+     * Reject and delete a pending user submission.
+     */
     @PostMapping("/{id}/reject")
     public String rejectProduct(
             @PathVariable Long id,
@@ -74,5 +124,55 @@ public class AdminProductController {
         }
 
         return "redirect:/admin/products/pending";
+    }
+
+    /*
+     * Make an approved product publicly visible.
+     */
+    @PostMapping("/{id}/activate")
+    public String activateProduct(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            productService.activateProduct(id);
+
+            redirectAttributes.addFlashAttribute(
+                    "catalogueSuccess",
+                    "The product was activated successfully."
+            );
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute(
+                    "catalogueError",
+                    exception.getMessage()
+            );
+        }
+
+        return "redirect:/admin/products";
+    }
+
+    /*
+     * Hide an approved product from the public catalogue.
+     */
+    @PostMapping("/{id}/deactivate")
+    public String deactivateProduct(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            productService.deactivateProduct(id);
+
+            redirectAttributes.addFlashAttribute(
+                    "catalogueSuccess",
+                    "The product was deactivated successfully."
+            );
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute(
+                    "catalogueError",
+                    exception.getMessage()
+            );
+        }
+
+        return "redirect:/admin/products";
     }
 }

@@ -61,6 +61,16 @@
 
                     </li>
 
+                    <li class="nav-item"
+                        sec:authorize="hasRole('ADMIN')">
+
+                        <a class="nav-link"
+                           th:href="@{/admin/products}">
+                            Admin
+                        </a>
+
+                    </li>
+
                 </ul>
 
                 <div sec:authorize="isAnonymous()"

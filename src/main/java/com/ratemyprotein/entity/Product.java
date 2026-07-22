@@ -56,6 +56,9 @@ public class Product {
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
 
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
     @Column(nullable = false, length = 150)
     private String name;
 
@@ -129,6 +132,10 @@ public class Product {
         return submittedAt;
     }
 
+    public LocalDateTime getApprovedAt() {
+        return approvedAt;
+    }
+
     public String getName() {
         return name;
     }
@@ -179,6 +186,10 @@ public class Product {
 
     public void setSubmittedAt(LocalDateTime submittedAt) {
         this.submittedAt = submittedAt;
+    }
+
+    public void setApprovedAt(LocalDateTime approvedAt) {
+        this.approvedAt = approvedAt;
     }
 
     public void setName(String name) {

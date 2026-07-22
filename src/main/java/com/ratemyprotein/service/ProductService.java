@@ -177,7 +177,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<Product> getPendingProductSubmissions() {
         return productRepository
-                .findByActiveFalseAndSubmittedByIsNotNullOrderBySubmittedAtAsc();
+                .findByActiveFalseAndSubmittedByIsNotNullAndApprovedAtIsNullOrderBySubmittedAtAsc();
     }
 
     @Transactional
@@ -192,6 +192,7 @@ public class ProductService {
                 );
 
         product.setActive(true);
+        product.setApprovedAt(LocalDateTime.now());
 
         return productRepository.save(product);
     }
@@ -208,5 +209,57 @@ public class ProductService {
                 );
 
         productRepository.delete(product);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Product> getManagedProducts() {
+        return productRepository.findAllManagedProducts();
+    }
+
+    @Transactional
+    public Product activateProduct(Long productId) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Product was not found."
+                        )
+                );
+
+        if (isPendingSubmission(product)) {
+            throw new IllegalArgumentException(
+                    "Pending submissions must be approved from the pending-products page."
+            );
+        }
+
+        product.setActive(true);
+
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public Product deactivateProduct(Long productId) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Product was not found."
+                        )
+                );
+
+        if (isPendingSubmission(product)) {
+            throw new IllegalArgumentException(
+                    "This product is still waiting for approval."
+            );
+        }
+
+        product.setActive(false);
+
+        return productRepository.save(product);
+    }
+
+    private boolean isPendingSubmission(Product product) {
+        return product.getSubmittedBy() != null
+                && product.getApprovedAt() == null;
     }
 }

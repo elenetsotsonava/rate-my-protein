@@ -77,7 +77,7 @@ public interface ProductRepository
             "submittedBy"
     })
     List<Product>
-    findByActiveFalseAndSubmittedByIsNotNullOrderBySubmittedAtAsc();
+    findByActiveFalseAndSubmittedByIsNotNullAndApprovedAtIsNullOrderBySubmittedAtAsc();
 
     @EntityGraph(attributePaths = {
             "brand",
@@ -85,12 +85,13 @@ public interface ProductRepository
             "submittedBy"
     })
     @Query("""
-            SELECT p
-            FROM Product p
-            WHERE p.id = :id
-              AND p.active = false
-              AND p.submittedBy IS NOT NULL
-            """)
+        SELECT p
+        FROM Product p
+        WHERE p.id = :id
+          AND p.active = false
+          AND p.submittedBy IS NOT NULL
+          AND p.approvedAt IS NULL
+        """)
     Optional<Product> findPendingSubmissionById(
             @Param("id") Long id
     );
@@ -100,4 +101,21 @@ public interface ProductRepository
             String name,
             Long flavorId
     );
+
+    @EntityGraph(attributePaths = {
+            "brand",
+            "flavor",
+            "submittedBy"
+    })
+    @Query("""
+        SELECT p
+        FROM Product p
+        WHERE p.submittedBy IS NULL
+           OR p.approvedAt IS NOT NULL
+        ORDER BY
+            p.brand.name,
+            p.name,
+            p.flavor.name
+        """)
+    List<Product> findAllManagedProducts();
 }
