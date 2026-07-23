@@ -162,16 +162,16 @@
                         <div class="col-sm-6 col-md-4">
 
                             <small class="text-muted-custom d-block">
-                                Price
+                                Price (USD)
                             </small>
 
                             <strong th:if="${product.price != null}">
-                                ₾<span th:text="${#numbers.formatDecimal(
+                                $<span th:text="${#numbers.formatDecimal(
                                         product.price,
                                         1,
                                         2
                                 )}">
-                                    149.90
+                                    39.99
                                 </span>
                             </strong>
 

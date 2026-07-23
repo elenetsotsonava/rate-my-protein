@@ -54,26 +54,42 @@ public class DataInitializer {
             Flavor chocolate = flavorRepository
                     .findByNameIgnoreCase("Double Chocolate")
                     .orElseGet(() -> flavorRepository.save(
-                            new Flavor("Double Chocolate", "Chocolate")
+                            new Flavor(
+                                    "Double Chocolate",
+                                    "Chocolate"
+                            )
                     ));
 
             Flavor vanilla = flavorRepository
                     .findByNameIgnoreCase("Vanilla Ice Cream")
                     .orElseGet(() -> flavorRepository.save(
-                            new Flavor("Vanilla Ice Cream", "Vanilla")
+                            new Flavor(
+                                    "Vanilla Ice Cream",
+                                    "Vanilla"
+                            )
                     ));
 
             Flavor strawberry = flavorRepository
                     .findByNameIgnoreCase("Strawberry Cream")
                     .orElseGet(() -> flavorRepository.save(
-                            new Flavor("Strawberry Cream", "Fruit")
+                            new Flavor(
+                                    "Strawberry Cream",
+                                    "Fruit"
+                            )
                     ));
 
             Flavor saltedCaramel = flavorRepository
                     .findByNameIgnoreCase("Salted Caramel")
                     .orElseGet(() -> flavorRepository.save(
-                            new Flavor("Salted Caramel", "Caramel")
+                            new Flavor(
+                                    "Salted Caramel",
+                                    "Caramel"
+                            )
                     ));
+
+            /*
+             * Product prices are stored in USD.
+             */
 
             addProductIfMissing(
                     productRepository,
@@ -84,7 +100,7 @@ public class DataInitializer {
                     "Whey protein powder with a rich chocolate flavor.",
                     24,
                     120,
-                    new BigDecimal("149.90"),
+                    new BigDecimal("39.99"),
                     20
             );
 
@@ -97,7 +113,7 @@ public class DataInitializer {
                     "Whey protein powder with vanilla ice cream flavor.",
                     24,
                     120,
-                    new BigDecimal("149.90"),
+                    new BigDecimal("39.99"),
                     15
             );
 
@@ -110,7 +126,7 @@ public class DataInitializer {
                     "Whey protein with a sweet and creamy salted caramel flavor.",
                     21,
                     103,
-                    new BigDecimal("119.90"),
+                    new BigDecimal("29.99"),
                     30
             );
 
@@ -123,7 +139,7 @@ public class DataInitializer {
                     "Whey isolate with strawberry flavor and low sugar content.",
                     25,
                     110,
-                    new BigDecimal("159.90"),
+                    new BigDecimal("44.99"),
                     12
             );
         };
@@ -142,11 +158,12 @@ public class DataInitializer {
             Integer stockQuantity
     ) {
         boolean exists =
-                productRepository.existsByBrandIdAndNameIgnoreCaseAndFlavorId(
-                        brand.getId(),
-                        name,
-                        flavor.getId()
-                );
+                productRepository
+                        .existsByBrandIdAndNameIgnoreCaseAndFlavorId(
+                                brand.getId(),
+                                name,
+                                flavor.getId()
+                        );
 
         if (!exists) {
             Product product = new Product(
